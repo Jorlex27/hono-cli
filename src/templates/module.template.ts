@@ -22,7 +22,7 @@ import { createController } from '@/shared/controller'
 import { ${name.toLowerCase()}Service } from './${kebabName}.service'
 import { ${camelName}Schema } from './${kebabName}.validation'
 
-const baseSantriController = createController({
+const baseController = createController({
     service: ${name.toLowerCase()}Service,
     validationSchema: ${camelName}Schema,
     // formatData: (data) => data,
@@ -30,18 +30,19 @@ const baseSantriController = createController({
 })
 
 export const ${camelName}Controller = {
-    ...baseSantriController,
+    ...baseController,
 
     // Add your custom methods here
 }`
 
 export const generateServiceTemplate = (name: string, kebabName: string, upperName: string): string => `
 import { COLLECTIONS } from '@/config/collections.config'
-import { BaseService, createService } from '@/shared/service'
+import { BaseService } from '@/shared/service'
 import type { ${name}Data, ${name}Input } from './${kebabName}.types'
 
-export const ${name.toLowerCase()}Service = createService<${name}Data, ${name}Input>({
+export const ${name.toLowerCase()}Service = new BaseService<${name}Data, ${name}Input>({
     collectionName: COLLECTIONS.${upperName},
+    softDelete: true,
     aggregatePipeline: async () => [], // Add your aggregation pipeline here
 
     // Add your custom methods here

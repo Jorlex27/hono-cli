@@ -10,7 +10,7 @@ import fs from 'fs/promises'
 const program = new Command()
 
 program
-    .version('1.0.0')
+    .version('1.0.7')
     .description('Hono.js project generator');
 
 program
