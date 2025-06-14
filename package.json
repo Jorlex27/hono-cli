@@ -1,0 +1,47 @@
+{
+  "name": "hono-cli",
+  "version": "1.0.6",
+  "description": "CLI tool for hono.js projects",
+  "type": "module",
+  "bin": {
+    "hono-cli": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun build ./src/cli.ts --outdir ./dist --target node",
+    "start": "node dist/cli.js",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "hono",
+    "cli",
+    "generator",
+    "bun",
+    "honojs",
+    "scaffold",
+    "boilerplate"
+  ],
+  "author": "Alex Veros <alexveros46@mail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jorlex27/hono-cli.git"
+  },
+  "homepage": "https://github.com/Jorlex27/hono-cli#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.0.0",
+    "inquirer": "^9.2.10"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.7",
+    "typescript": "^5.2.2"
+  }
+}
