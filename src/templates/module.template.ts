@@ -1,11 +1,11 @@
 export const generateTypesTemplate = (name: string): string => `
-import { BaseModel } from '@/shared/service/types'
+import { BaseInput, BaseModel } from '@/shared/service/types'
 
 export interface ${name}Data extends BaseModel {
     // Add your schema here
 }
-    
-export type ${name}Input = Omit<${name}Data, '_id' | 'createdAt' | 'updatedAt'>
+
+export type ${name}Input = BaseInput<${name}Data>
 `
 
 export const generateValidatorTemplate = (name: string): string => `
@@ -25,8 +25,13 @@ import { ${camelName}Schema } from './${kebabName}.validation'
 const baseController = createController({
     service: ${name.toLowerCase()}Service,
     validationSchema: ${camelName}Schema,
-    // formatData: (data) => data,
-    entityName: '${name}'
+    entityName: '${name}',
+    // requireAuth: false,
+    // allowedRoles: [],
+    // hooks: {
+    //     beforeCreate: async (data, context, c) => {},
+    //     afterCreate: async (data, context, c) => {},
+    // },
 })
 
 export const ${camelName}Controller = {
@@ -43,9 +48,26 @@ import type { ${name}Data, ${name}Input } from './${kebabName}.types'
 export const ${name.toLowerCase()}Service = new BaseService<${name}Data, ${name}Input>({
     collectionName: COLLECTIONS.${upperName},
     softDelete: true,
+    // searchFields: ['name'],
+    // filterFields: ['status', 'createdAt'],
+    // sortFields: ['name', 'createdAt'],
     aggregatePipeline: async () => [], // Add your aggregation pipeline here
 
-    // Add your custom methods here
+    // Lifecycle hooks
+    // beforeCreate: async (data, context) => data,
+    // afterCreate: async (item, context) => item,
+    // beforeUpdate: async (id, data, context) => data,
+    // afterUpdate: async (item, context) => item,
+    // beforeDelete: async (id, context) => {},
+    // afterDelete: async (id, context) => {},
+
+    // Access control (optional)
+    // accessControl: {
+    //     canRead: (item, context) => true,
+    //     canCreate: (data, context) => true,
+    //     canUpdate: (item, updates, context) => true,
+    //     canDelete: (item, context) => true,
+    // }
 })
 `
 
@@ -58,6 +80,7 @@ export const ${camelName}Router =
         .get('/', ${camelName}Controller.getAll)
         .get('/:id', ${camelName}Controller.getById)
         .post('/', ${camelName}Controller.create)
+        .post('/restore/:id', ${camelName}Controller.restore)
         .put('/:id', ${camelName}Controller.update)
         .delete('/:id', ${camelName}Controller.delete)
     `

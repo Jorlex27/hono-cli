@@ -15,14 +15,15 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "rootDir": ".",
-    "baseUrl": "src",
     "paths": {
-      "@/*": ["*"],
-      "@modules/*": ["modules/*"],
-      "@shared/*": ["shared/*"],
-      "@config/*": ["config/*"],
-      "@templates/*": ["templates/*"],
-      "@utils/*": ["utils/*"]
+      "@/*": ["./src/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@config/*": ["./src/config/*"],
+      "@templates/*": ["./src/templates/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@commands/*": ["./src/commands/*"],
+      "@core/*": ["./src/core/*"]
     }
   },
   "include": ["src/**/*"],
