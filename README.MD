@@ -1,9 +1,10 @@
 # Hono-CLI 🦊
 
-A powerful CLI tool for scaffolding and managing Hono.js projects. Create new projects, generate modules, and streamline your development workflow with MongoDB integration.
+A powerful CLI tool for scaffolding and managing Hono.js projects with production-ready features. Create new projects, generate modules with advanced patterns, and streamline your development workflow with MongoDB integration.
 
 ## Features ✨
 
+### Core Features
 - Quick project initialization with best practices
 - Module generation with CRUD operations
 - MongoDB integration out of the box
@@ -12,6 +13,19 @@ A powerful CLI tool for scaffolding and managing Hono.js projects. Create new pr
 - Path aliases for better imports
 - Environment configuration
 - Developer-friendly CLI interface
+
+### 🆕 v2.0.0 Advanced Features
+- **Advanced Query System** - Filter operators (gt, gte, lt, lte, ne, in, nin, regex, exists, between)
+- **Soft Delete** - Built-in soft delete support with audit trail
+- **Lifecycle Hooks** - beforeCreate, afterCreate, beforeUpdate, afterUpdate, beforeDelete, afterDelete
+- **Service Context** - Request context management with user info and metadata
+- **Access Control** - Optional authentication and role-based authorization
+- **Transaction Support** - MongoDB transaction support via ServiceContext
+- **API Error Handler** - Consistent error responses with ApiError class
+- **Bulk Operations** - createMany, updateMany, deleteMany methods
+- **Statistics** - Built-in getStats and countDocuments methods
+- **Restore Functionality** - Restore soft-deleted items
+- **Advanced Aggregation** - Custom pipeline support with pagination
 
 ## Installation 🚀
 
@@ -156,25 +170,101 @@ PROD_DB_NAME=hono_prod
 |---------|-------------|
 | `hono-cli init <name>` | Create new Hono.js project |
 | `hono-cli g:m <name>` | Generate new module with CRUD |
+| `hono-cli g:r <name>` | Generate router only |
+| `hono-cli version` or `hono-cli v` | Show version info |
+
+## Advanced Query Features 🔍
+
+### Filter Operators
+
+```bash
+# Greater than / Less than
+GET /users?age__gte=18&age__lte=65
+
+# Not equal
+GET /users?status__ne=inactive
+
+# In / Not in
+GET /users?role__in=admin,moderator
+GET /users?role__nin=guest,banned
+
+# Regex pattern matching
+GET /users?name__regex=john
+
+# Exists check
+GET /users?deletedAt__exists=false
+
+# Between range
+GET /users?createdAt__between=2024-01-01,2024-12-31
+```
+
+### Array Size Operators
+
+```bash
+# Array size greater than
+GET /users?posts__size_gt=10
+
+# Array size in range
+GET /users?posts__size_between=5,20
+```
+
+### Pagination & Sorting
+
+```bash
+# Pagination
+GET /users?page=1&limit=10
+
+# Sort by multiple fields
+GET /users?sort=name:asc,createdAt:desc
+
+# Search
+GET /users?search=john&searchFields=name,email
+```
+
+### Field Projection
+
+```bash
+# Include specific fields only
+GET /users?include=name,email
+
+# Exclude fields
+GET /users?exclude=password,internal
+```
 
 ## Project Structure 🏗
 
 ```
 src/
-├── modules/           # Feature modules
-│   └── user/         # Example module
+├── modules/              # Feature modules
+│   └── user/            # Example module
 │       ├── user.controller.ts
 │       ├── user.service.ts
 │       ├── user.routes.ts
-│       └── user.types.ts
+│       ├── user.types.ts
+│       ├── user.validation.ts
+│       └── index.ts
 ├── shared/
-│   ├── middleware/   # Custom middleware
-│   └── utils/        # Utility functions
-├── config/           # Configuration files
+│   ├── controller/      # Base controller with createController
+│   │   ├── index.ts
+│   │   └── types.ts
+│   ├── service/         # BaseService with advanced features
+│   │   ├── index.ts
+│   │   └── types.ts
+│   ├── query/           # 🆕 QueryParser for filtering
+│   │   ├── index.ts
+│   │   └── types.ts
+│   ├── errors/          # 🆕 ApiError handler
+│   │   └── index.ts
+│   ├── aggregate/       # 🆕 Aggregation types
+│   │   └── types.ts
+│   ├── middleware/      # Custom middleware
+│   ├── utils/           # Utility functions
+│   └── pagination/      # Pagination helpers
+├── config/              # Configuration files
 │   ├── db.config.ts
 │   └── collections.config.ts
-├── index.ts          # Application entry
-└── routes.ts         # Route manager
+├── index.ts             # Application entry
+└── routes.ts            # Route manager
 ```
 
 ## Best Practices 💡
