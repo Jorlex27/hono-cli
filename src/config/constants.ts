@@ -13,6 +13,7 @@ export const DIRECTORIES = {
   SHARED_AGGREGATE: 'src/shared/aggregate',
   SHARED_ERRORS: 'src/shared/errors',
   CONFIG: 'src/config',
+  SCRIPTS: 'scripts',
 } as const
 
 export const FILE_NAMES = {

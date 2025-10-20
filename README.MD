@@ -173,12 +173,6 @@ PROD_DB_NAME=hono_prod
 | `hono-cli g:m <name>` | Generate new module with CRUD |
 | `hono-cli g:r <name>` | Generate router only |
 | `hono-cli version` or `hono-cli v` | Show version info |
-| `hono-cli seed <module>` | Seed data for a specific module |
-| `hono-cli unseed <module>` | Remove seeded data for a specific module |
-| `hono-cli seed:all` | Seed data for all modules |
-| `hono-cli unseed:all` | Remove seeded data for all modules |
-| `hono-cli seed:refresh [module]` | Refresh seeds (unseed then seed) |
-| `hono-cli seed:status` | Show seeding status for all modules |
 
 ## Database Seeding 🌱
 
@@ -187,6 +181,8 @@ The CLI provides a powerful seeding system to populate your database with develo
 ### Overview
 
 When you generate a module with `hono-cli g:m <name>`, a seed file is automatically created at `src/modules/<name>/<name>.seed.ts`. This file contains a seeder class that you can customize with your seed data.
+
+The seeding system runs within your project (not from the CLI) to properly handle TypeScript and your project's imports.
 
 ### Seed File Structure
 
@@ -235,10 +231,12 @@ export class UserSeeder {
 
 ### Seeding Commands
 
+All seed commands are run from within your project using the `bun seed` script:
+
 #### Seed a Specific Module
 
 ```bash
-hono-cli seed user
+bun seed seed user
 ```
 
 This will execute the `seed()` method of the UserSeeder class and populate the database with the defined data.
@@ -246,7 +244,7 @@ This will execute the `seed()` method of the UserSeeder class and populate the d
 #### Unseed a Specific Module
 
 ```bash
-hono-cli unseed user
+bun seed unseed user
 ```
 
 This will remove all data that was seeded by the UserSeeder.
@@ -254,7 +252,7 @@ This will remove all data that was seeded by the UserSeeder.
 #### Seed All Modules
 
 ```bash
-hono-cli seed:all
+bun seed seed:all
 ```
 
 Automatically discovers and runs all seeders in your `src/modules/` directory.
@@ -262,7 +260,7 @@ Automatically discovers and runs all seeders in your `src/modules/` directory.
 #### Unseed All Modules
 
 ```bash
-hono-cli unseed:all
+bun seed unseed:all
 ```
 
 Removes all seeded data from all modules (in reverse order).
@@ -271,31 +269,21 @@ Removes all seeded data from all modules (in reverse order).
 
 ```bash
 # Refresh a specific module
-hono-cli seed:refresh user
+bun seed seed:refresh user
 
 # Refresh all modules
-hono-cli seed:refresh
+bun seed seed:refresh
 ```
 
 This will unseed and then seed again, useful when you've updated your seed data.
 
-#### Check Seeding Status
+#### Check Available Seeders
 
 ```bash
-hono-cli seed:status
+bun seed seed:status
 ```
 
-Shows the status of all seeders:
-```
-📊 Seeder Status
-
-Module                        Status         Count
-──────────────────────────────────────────────────
-user                          ✓ Seeded       2
-product                       ○ Not seeded   0
-
-Total: 1/2 modules seeded (2 items)
-```
+Shows all available seeders in your project.
 
 ### Customizing Seed Data
 

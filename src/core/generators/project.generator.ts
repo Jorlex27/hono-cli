@@ -13,6 +13,7 @@ import {
   CLI_NAME,
 } from '@config/constants'
 import { generateIndexTs, generateRouteManagerTemplate } from '@/templates/project.template'
+import { generateSeedRunnerTemplate } from '@/templates/seed.template'
 import { dbConfig } from '@config/templates/db.config'
 import { dbUtil } from '@config/templates/db.utils'
 import { tsConfig } from '@config/templates/ts.config'
@@ -177,6 +178,11 @@ const writeMainFiles = async (
     path.join(projectPath, FILE_NAMES.GITIGNORE),
     'node_modules/\n.env\ndist/\n.DS_Store\n'
   )
+
+  await writeFile(
+    path.join(projectPath, 'scripts/seed.ts'),
+    generateSeedRunnerTemplate()
+  )
 }
 
 /**
@@ -194,6 +200,7 @@ const updatePackageJson = async (
       dev: 'bun run --watch src/index.ts',
       start: 'bun run src/index.ts',
       build: 'bun build ./src/cli.ts --outdir ./dist --target node',
+      seed: 'bun run scripts/seed.ts',
     },
     dependencies: {
       hono: 'latest',
