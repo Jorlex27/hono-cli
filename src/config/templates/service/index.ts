@@ -46,10 +46,6 @@ export class BaseService<T extends BaseModel, U extends BaseInput<T>> {
             query.deletedAt = { $exists: false }
         }
 
-        if (this.options.accessControl?.canRead && context) {
-            query = await this.applyAccessControl(query, context)
-        }
-
         if (this.options.transformQuery) {
             query = this.options.transformQuery(query, context, params)
         }
@@ -226,12 +222,6 @@ export class BaseService<T extends BaseModel, U extends BaseInput<T>> {
 
         const item = items[0] as T
 
-        if (this.options.accessControl?.canRead && context) {
-            if (!this.options.accessControl.canRead(item, context)) {
-                throw new Error('Access denied')
-            }
-        }
-
         return item
     }
 
@@ -241,10 +231,6 @@ export class BaseService<T extends BaseModel, U extends BaseInput<T>> {
         let query = { ...filter }
         if (this.options.softDelete) {
             query.deletedAt = { $exists: false }
-        }
-
-        if (this.options.accessControl?.canRead && context) {
-            query = await this.applyAccessControl(query, context)
         }
 
         const findOptions: any = {
@@ -257,13 +243,6 @@ export class BaseService<T extends BaseModel, U extends BaseInput<T>> {
 
         const items = await collection.find(query, findOptions).toArray()
 
-        if (this.options.accessControl?.canRead && context) {
-            const filteredItems = items.filter(item =>
-                this.options.accessControl!.canRead!(item as T, context)
-            )
-            return filteredItems as T[]
-        }
-
         return items as T[]
     }
 
@@ -273,10 +252,6 @@ export class BaseService<T extends BaseModel, U extends BaseInput<T>> {
         let query = { ...filter }
         if (this.options.softDelete) {
             query.deletedAt = { $exists: false }
-        }
-
-        if (this.options.accessControl?.canRead && context) {
-            query = await this.applyAccessControl(query, context)
         }
 
         const findOptions: any = {}
@@ -289,12 +264,6 @@ export class BaseService<T extends BaseModel, U extends BaseInput<T>> {
 
         if (!item) {
             return null
-        }
-
-        if (this.options.accessControl?.canRead && context) {
-            if (!this.options.accessControl.canRead(item as T, context)) {
-                throw new Error('Access denied')
-            }
         }
 
         return item as T
@@ -346,11 +315,6 @@ export class BaseService<T extends BaseModel, U extends BaseInput<T>> {
             ...(context?.userId && { createdBy: new ObjectId(context.userId) })
         } as unknown as T
 
-        if (this.options.accessControl?.canCreate && context) {
-            if (!this.options.accessControl.canCreate(newItem, context)) {
-                throw new Error('Access denied')
-            }
-        }
         const insertOptions: any = {}
         if (context?.transaction) {
             insertOptions.session = context.transaction
@@ -374,12 +338,6 @@ export class BaseService<T extends BaseModel, U extends BaseInput<T>> {
     async update(id: string, data: Partial<T>, context?: ServiceContext, options?: { skipBeforeUpdate: boolean }): Promise<T> {
         const collection = await this.collection()
         const existingItem = await this.findById(id, context)
-
-        if (this.options.accessControl?.canUpdate && context) {
-            if (!this.options.accessControl.canUpdate(existingItem, data, context)) {
-                throw new Error('Access denied')
-            }
-        }
 
         let updateData = {
             ...data,
@@ -441,12 +399,6 @@ export class BaseService<T extends BaseModel, U extends BaseInput<T>> {
 
     async delete(id: string, context?: ServiceContext): Promise<{ id: string }> {
         const existingItem = await this.findById(id, context)
-
-        if (this.options.accessControl?.canDelete && context) {
-            if (!this.options.accessControl.canDelete(existingItem, context)) {
-                throw new Error('Access denied')
-            }
-        }
 
         if (this.options.beforeDelete) {
             await this.options.beforeDelete(id, context)
@@ -661,10 +613,6 @@ export class BaseService<T extends BaseModel, U extends BaseInput<T>> {
             return await Promise.resolve(this.options.aggregatePipeline(query, context, params))
         }
         return []
-    }
-
-    private async applyAccessControl(query: any, context: ServiceContext): Promise<any> {
-        return query
     }
 
     get _collectionName() {

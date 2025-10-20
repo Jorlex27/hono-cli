@@ -51,14 +51,6 @@ export interface ServiceOptions<T extends BaseModel, U extends BaseInput<T>> {
     beforeDelete?: (id: string, context?: ServiceContext) => Promise<void> | void
     afterDelete?: (id: string, context?: ServiceContext) => Promise<void> | void
 
-    // Access control (optional - disabled by default)
-    accessControl?: {
-        canRead?: (item: T, context: ServiceContext) => boolean
-        canCreate?: (data: any, context: ServiceContext) => boolean
-        canUpdate?: (item: T, updates: Partial<T>, context: ServiceContext) => boolean
-        canDelete?: (item: T, context: ServiceContext) => boolean
-    }
-
     // Aggregation pipelines
     aggregatePipeline?: (query?: Record<string, any>, context?: ServiceContext, params?: QueryParams) => Promise<PipelineStage[]> | PipelineStage[]
     findAllPipeline?: (query?: Record<string, any>, context?: ServiceContext, params?: QueryParams) => Promise<PipelineStage[]> | PipelineStage[]

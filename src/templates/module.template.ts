@@ -26,8 +26,6 @@ const baseController = createController({
     service: ${name.toLowerCase()}Service,
     validationSchema: ${camelName}Schema,
     entityName: '${name}',
-    // requireAuth: false,
-    // allowedRoles: [],
     // hooks: {
     //     beforeCreate: async (data, context, c) => {},
     //     afterCreate: async (data, context, c) => {},
@@ -60,14 +58,6 @@ export const ${name.toLowerCase()}Service = new BaseService<${name}Data, ${name}
     // afterUpdate: async (item, context) => item,
     // beforeDelete: async (id, context) => {},
     // afterDelete: async (id, context) => {},
-
-    // Access control (optional)
-    // accessControl: {
-    //     canRead: (item, context) => true,
-    //     canCreate: (data, context) => true,
-    //     canUpdate: (item, updates, context) => true,
-    //     canDelete: (item, context) => true,
-    // }
 })
 `
 

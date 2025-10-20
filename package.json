@@ -1,6 +1,6 @@
 {
   "name": "hono-cli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "CLI tool for hono.js projects",
   "type": "module",
   "bin": {

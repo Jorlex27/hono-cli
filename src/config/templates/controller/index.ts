@@ -8,7 +8,7 @@ import { ControllerOptions } from "./types"
 export function createController<T extends BaseModel, U extends BaseInput<T>>(
     options: ControllerOptions<T, U>
 ) {
-    const { service, validationSchema, validationUpdateSchema, entityName = 'Item', requireAuth = false, allowedRoles = [], hooks, findByIdOptions = {} } = options
+    const { service, validationSchema, validationUpdateSchema, entityName = 'Item', hooks, findByIdOptions = {} } = options
 
     const extractContext = (c: Context): ServiceContext => ({
         user: c.get('user'),
@@ -19,22 +19,9 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
         }
     })
 
-    const checkAccess = (c: Context, requiredRoles: string[] = allowedRoles) => {
-        if (!requireAuth) return
-
-        const userId = c.get('user')?._id
-        const userRole = c.get('role')?.name
-
-        if (!userId) throw ApiError.unauthorized()
-        if (requiredRoles.length > 0 && userRole && !requiredRoles.includes(userRole)) {
-            throw ApiError.accessDenied(\`access \${entityName}\`)
-        }
-    }
-
     return {
         getAll: async (c: Context) => {
             try {
-                checkAccess(c)
                 const context = extractContext(c)
                 const result = await service.findAll(c, context)
 
@@ -50,7 +37,6 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
         getById: async (c: Context) => {
             try {
-                checkAccess(c)
                 const params = new QueryParser().parse(c.req.query())
                 const id = c.req.param('id')
                 if (!id) throw ApiError.missingParam('id')
@@ -69,7 +55,6 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
         create: async (c: Context) => {
             try {
-                checkAccess(c)
                 const data = await c.req.json()
                 const context = extractContext(c)
 
@@ -106,7 +91,6 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
         update: async (c: Context) => {
             try {
-                checkAccess(c)
                 const id = c.req.param('id')
                 if (!id) throw ApiError.missingParam('id')
 
@@ -155,7 +139,6 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
         delete: async (c: Context) => {
             try {
-                checkAccess(c)
                 const id = c.req.param('id')
                 if (!id) throw ApiError.missingParam('id')
 
@@ -187,7 +170,6 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
         restore: async (c: Context) => {
             try {
-                checkAccess(c)
                 const id = c.req.param('id')
                 if (!id) throw ApiError.missingParam('id')
 
@@ -206,7 +188,6 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
         bulkCreate: async (c: Context) => {
             try {
-                checkAccess(c, ['admin'])
                 const dataArray = await c.req.json()
 
                 if (!Array.isArray(dataArray)) {
@@ -228,7 +209,6 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
         getStats: async (c: Context) => {
             try {
-                checkAccess(c)
                 const stats = await service.getStats()
 
                 return c.json({

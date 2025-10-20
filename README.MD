@@ -19,7 +19,6 @@ A powerful CLI tool for scaffolding and managing Hono.js projects with productio
 - **Soft Delete** - Built-in soft delete support with audit trail
 - **Lifecycle Hooks** - beforeCreate, afterCreate, beforeUpdate, afterUpdate, beforeDelete, afterDelete
 - **Service Context** - Request context management with user info and metadata
-- **Access Control** - Optional authentication and role-based authorization
 - **Transaction Support** - MongoDB transaction support via ServiceContext
 - **API Error Handler** - Consistent error responses with ApiError class
 - **Bulk Operations** - createMany, updateMany, deleteMany methods

@@ -18,10 +18,6 @@ export interface ControllerOptions<T extends BaseModel, U extends BaseInput<T>> 
     validationUpdateSchema?: z.ZodSchema<Partial<T>>
     entityName?: string
 
-    // Access control (optional - disabled by default)
-    requireAuth?: boolean
-    allowedRoles?: string[]
-
     // Hooks
     hooks?: ControllerHooks<T, U>
 
