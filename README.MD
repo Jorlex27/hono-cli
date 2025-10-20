@@ -172,6 +172,7 @@ PROD_DB_NAME=hono_prod
 | `hono-cli init <name>` | Create new Hono.js project |
 | `hono-cli g:m <name>` | Generate new module with CRUD |
 | `hono-cli g:r <name>` | Generate router only |
+| `hono-cli add:seed` | Add seed system to existing project |
 | `hono-cli version` or `hono-cli v` | Show version info |
 
 ## Database Seeding 🌱
@@ -183,6 +184,19 @@ The CLI provides a powerful seeding system to populate your database with develo
 When you generate a module with `hono-cli g:m <name>`, a seed file is automatically created at `src/modules/<name>/<name>.seed.ts`. This file contains a seeder class that you can customize with your seed data.
 
 The seeding system runs within your project (not from the CLI) to properly handle TypeScript and your project's imports.
+
+### Adding Seed System to Existing Project
+
+If you have an existing project that doesn't have the seed system yet, you can add it with:
+
+```bash
+hono-cli add:seed
+```
+
+This will:
+- Create `scripts/seed.ts` file
+- Add `"seed"` script to your `package.json`
+- Setup the complete seeding infrastructure
 
 ### Seed File Structure
 

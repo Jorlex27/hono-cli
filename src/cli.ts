@@ -6,6 +6,7 @@ import {
     versionCommand,
     generateModuleCommand,
     generateRouterCommand,
+    addSeedCommand,
 } from '@/commands'
 
 const program = new Command()
@@ -35,5 +36,10 @@ program
     .command('g:r <name>')
     .description('Generate a new router')
     .action(generateRouterCommand)
+
+program
+    .command('add:seed')
+    .description('Add seed system to existing project')
+    .action(addSeedCommand)
 
 program.parse(process.argv)
