@@ -25,6 +25,7 @@ A powerful CLI tool for scaffolding and managing Hono.js projects with productio
 - **Statistics** - Built-in getStats and countDocuments methods
 - **Restore Functionality** - Restore soft-deleted items
 - **Advanced Aggregation** - Custom pipeline support with pagination
+- **Database Seeding** - Built-in seeding system for development and testing
 
 ## Installation 🚀
 
@@ -81,6 +82,7 @@ src/modules/user/
 ├── user.routes.ts
 ├── user.types.ts
 ├── user.validation.ts
+├── user.seed.ts        # 🆕 Seeder for development data
 └── index.ts
 ```
 
@@ -171,6 +173,165 @@ PROD_DB_NAME=hono_prod
 | `hono-cli g:m <name>` | Generate new module with CRUD |
 | `hono-cli g:r <name>` | Generate router only |
 | `hono-cli version` or `hono-cli v` | Show version info |
+| `hono-cli seed <module>` | Seed data for a specific module |
+| `hono-cli unseed <module>` | Remove seeded data for a specific module |
+| `hono-cli seed:all` | Seed data for all modules |
+| `hono-cli unseed:all` | Remove seeded data for all modules |
+| `hono-cli seed:refresh [module]` | Refresh seeds (unseed then seed) |
+| `hono-cli seed:status` | Show seeding status for all modules |
+
+## Database Seeding 🌱
+
+The CLI provides a powerful seeding system to populate your database with development or test data.
+
+### Overview
+
+When you generate a module with `hono-cli g:m <name>`, a seed file is automatically created at `src/modules/<name>/<name>.seed.ts`. This file contains a seeder class that you can customize with your seed data.
+
+### Seed File Structure
+
+```typescript
+import { userService } from './user.service'
+import type { UserInput } from './user.types'
+
+export class UserSeeder {
+    private seededIds: string[] = []
+
+    constructor(private service: typeof userService) {}
+
+    async seed(): Promise<string[]> {
+        console.log('🌱 Seeding user...')
+
+        const data: UserInput[] = [
+            { name: 'John Doe', email: 'john@example.com' },
+            { name: 'Jane Smith', email: 'jane@example.com' },
+        ]
+
+        const items = await this.service.createMany(data, {})
+        this.seededIds = items.map((item) => item._id.toString())
+
+        console.log(`✅ Seeded ${items.length} user(s)`)
+        return this.seededIds
+    }
+
+    async unseed(): Promise<void> {
+        console.log('🗑️  Unseeding user...')
+
+        if (this.seededIds.length === 0) {
+            console.log('⚠️  No seeded IDs to unseed for user')
+            return
+        }
+
+        await this.service.deleteMany(
+            { _id: { $in: this.seededIds } },
+            {}
+        )
+
+        console.log(`✅ Unseeded ${this.seededIds.length} user(s)`)
+        this.seededIds = []
+    }
+}
+```
+
+### Seeding Commands
+
+#### Seed a Specific Module
+
+```bash
+hono-cli seed user
+```
+
+This will execute the `seed()` method of the UserSeeder class and populate the database with the defined data.
+
+#### Unseed a Specific Module
+
+```bash
+hono-cli unseed user
+```
+
+This will remove all data that was seeded by the UserSeeder.
+
+#### Seed All Modules
+
+```bash
+hono-cli seed:all
+```
+
+Automatically discovers and runs all seeders in your `src/modules/` directory.
+
+#### Unseed All Modules
+
+```bash
+hono-cli unseed:all
+```
+
+Removes all seeded data from all modules (in reverse order).
+
+#### Refresh Seeds
+
+```bash
+# Refresh a specific module
+hono-cli seed:refresh user
+
+# Refresh all modules
+hono-cli seed:refresh
+```
+
+This will unseed and then seed again, useful when you've updated your seed data.
+
+#### Check Seeding Status
+
+```bash
+hono-cli seed:status
+```
+
+Shows the status of all seeders:
+```
+📊 Seeder Status
+
+Module                        Status         Count
+──────────────────────────────────────────────────
+user                          ✓ Seeded       2
+product                       ○ Not seeded   0
+
+Total: 1/2 modules seeded (2 items)
+```
+
+### Customizing Seed Data
+
+Edit the `data` array in your seed file to add your custom seed data:
+
+```typescript
+async seed(): Promise<string[]> {
+    const data: UserInput[] = [
+        {
+            name: 'Admin User',
+            email: 'admin@example.com',
+            role: 'admin',
+        },
+        {
+            name: 'Test User',
+            email: 'test@example.com',
+            role: 'user',
+        },
+        // Add more seed data here
+    ]
+
+    const items = await this.service.createMany(data, {})
+    this.seededIds = items.map((item) => item._id.toString())
+
+    console.log(`✅ Seeded ${items.length} user(s)`)
+    return this.seededIds
+}
+```
+
+### Best Practices for Seeding
+
+1. **Use Realistic Data**: Seed data should resemble production data for better testing
+2. **Track Seeded IDs**: The seeder automatically tracks IDs for proper cleanup
+3. **Seed in Order**: If modules have dependencies, seed in the correct order
+4. **Clean Up**: Always unseed before re-seeding to avoid duplicates
+5. **Development Only**: Seeders are for development/testing, not production
 
 ## Advanced Query Features 🔍
 

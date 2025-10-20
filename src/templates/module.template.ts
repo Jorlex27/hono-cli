@@ -74,3 +74,61 @@ export const ${camelName}Router =
         .put('/:id', ${camelName}Controller.update)
         .delete('/:id', ${camelName}Controller.delete)
     `
+
+export const generateSeederTemplate = (pascalName: string, kebabName: string, camelName: string): string => `
+import { ${camelName}Service } from './${kebabName}.service'
+import type { ${pascalName}Input } from './${kebabName}.types'
+
+export class ${pascalName}Seeder {
+    private seededIds: string[] = []
+
+    constructor(private service: typeof ${camelName}Service) {}
+
+    async seed(): Promise<string[]> {
+        console.log('🌱 Seeding ${kebabName}...')
+
+        const data: ${pascalName}Input[] = [
+            // Add your seed data here
+            // Example:
+            // { name: 'Sample ${pascalName} 1' },
+            // { name: 'Sample ${pascalName} 2' },
+        ]
+
+        if (data.length === 0) {
+            console.log('⚠️  No seed data defined for ${kebabName}')
+            return []
+        }
+
+        const items = await this.service.createMany(data, {})
+        this.seededIds = items.map((item) => item._id.toString())
+
+        console.log(\`✅ Seeded \${items.length} ${kebabName}(s)\`)
+        return this.seededIds
+    }
+
+    async unseed(): Promise<void> {
+        console.log('🗑️  Unseeding ${kebabName}...')
+
+        if (this.seededIds.length === 0) {
+            console.log('⚠️  No seeded IDs to unseed for ${kebabName}')
+            return
+        }
+
+        await this.service.deleteMany(
+            { _id: { $in: this.seededIds } },
+            {}
+        )
+
+        console.log(\`✅ Unseeded \${this.seededIds.length} ${kebabName}(s)\`)
+        this.seededIds = []
+    }
+
+    getSeededIds(): string[] {
+        return this.seededIds
+    }
+
+    setSeededIds(ids: string[]): void {
+        this.seededIds = ids
+    }
+}
+`

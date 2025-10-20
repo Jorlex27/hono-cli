@@ -14,6 +14,7 @@ import {
   generateControllerTemplate,
   generateServiceTemplate,
   generateRouteTemplate,
+  generateSeederTemplate,
 } from '@/templates/module.template'
 
 /**
@@ -66,6 +67,10 @@ export const generateModule = async (name: string): Promise<void> => {
       {
         filename: `${kebab}.routes.ts`,
         content: generateRouteTemplate(pascal, kebab, camel),
+      },
+      {
+        filename: `${kebab}.seed.ts`,
+        content: generateSeederTemplate(pascal, kebab, camel),
       },
       {
         filename: 'index.ts',
