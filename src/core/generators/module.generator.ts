@@ -62,7 +62,7 @@ export const generateModule = async (name: string): Promise<void> => {
       },
       {
         filename: `${kebab}.service.ts`,
-        content: generateServiceTemplate(pascal, kebab, upper),
+        content: generateServiceTemplate(pascal, kebab, upper, camel),
       },
       {
         filename: `${kebab}.routes.ts`,

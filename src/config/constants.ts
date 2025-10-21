@@ -1,4 +1,4 @@
-export const CLI_VERSION = '2.0.0'
+export const CLI_VERSION = '2.0.5'
 
 export const CLI_NAME = 'hono-cli'
 
@@ -28,7 +28,7 @@ export const FILE_NAMES = {
 } as const
 
 export const DEPENDENCIES = {
-  PRODUCTION: ['hono', '@hono/swagger-ui', 'zod', 'mongodb'],
+  PRODUCTION: ['hono', 'zod', 'mongodb'],
   DEVELOPMENT: ['@types/mongodb', '@types/bun'],
 } as const
 

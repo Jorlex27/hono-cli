@@ -204,7 +204,6 @@ const updatePackageJson = async (
     },
     dependencies: {
       hono: 'latest',
-      '@hono/swagger-ui': 'latest',
       mongodb: 'latest',
       zod: 'latest',
     },

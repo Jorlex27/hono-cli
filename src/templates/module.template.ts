@@ -19,11 +19,11 @@ export const ${name}Schema = z.object({
 export const generateControllerTemplate = (name: string, kebabName: string, camelName: string): string => `
 import type { Context } from "hono"
 import { createController } from '@/shared/controller'
-import { ${name.toLowerCase()}Service } from './${kebabName}.service'
+import { ${camelName}Service } from './${kebabName}.service'
 import { ${camelName}Schema } from './${kebabName}.validation'
 
 const baseController = createController({
-    service: ${name.toLowerCase()}Service,
+    service: ${camelName}Service,
     validationSchema: ${camelName}Schema,
     entityName: '${name}',
     // hooks: {
@@ -38,12 +38,12 @@ export const ${camelName}Controller = {
     // Add your custom methods here
 }`
 
-export const generateServiceTemplate = (name: string, kebabName: string, upperName: string): string => `
+export const generateServiceTemplate = (name: string, kebabName: string, upperName: string, camelName: string): string => `
 import { COLLECTIONS } from '@/config/collections.config'
 import { BaseService } from '@/shared/service'
 import type { ${name}Data, ${name}Input } from './${kebabName}.types'
 
-export const ${name.toLowerCase()}Service = new BaseService<${name}Data, ${name}Input>({
+export const ${camelName}Service = new BaseService<${name}Data, ${name}Input>({
     collectionName: COLLECTIONS.${upperName},
     softDelete: true,
     // searchFields: ['name'],
