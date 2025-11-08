@@ -12,13 +12,16 @@ src/
 ├── commands/                   # Command handlers
 │   ├── init.command.ts        # Handle project initialization
 │   ├── generate.command.ts    # Handle module/router generation
+│   ├── setup.command.ts       # Handle existing project setup
+│   ├── add.command.ts         # Handle add seed system
 │   ├── version.command.ts     # Handle version display
 │   └── index.ts               # Export all commands
 ├── core/                       # Core business logic
 │   ├── generators/            # Code generators
 │   │   ├── project.generator.ts
 │   │   ├── module.generator.ts
-│   │   └── router.generator.ts
+│   │   ├── router.generator.ts
+│   │   └── setup.generator.ts
 │   └── managers/              # Resource managers
 │       ├── route.manager.ts   # Manages route registration
 │       └── collection.manager.ts # Manages collection config
@@ -166,6 +169,32 @@ hono-cli g:r <name>
 ```
 
 Generates a standalone router without the full module structure.
+
+### Setup Existing Project
+
+```bash
+hono-cli setup [options]
+```
+
+Setup hono-cli structure in an existing project. This command:
+- Creates shared structure (controller, service, pagination, query, aggregate, errors)
+- Adds database configuration
+- Creates seed runner script
+- Updates tsconfig.json with path aliases
+- Updates package.json with dependencies and scripts
+
+Options:
+- `-f, --force` - Overwrite existing files without asking
+- `-d, --dry-run` - Show what would be done without making changes
+- `-b, --backup` - Backup existing files before overwriting
+
+### Add Seed System
+
+```bash
+hono-cli add:seed
+```
+
+Add seed system to an existing project without the full setup.
 
 ### Check Version
 

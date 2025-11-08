@@ -99,6 +99,41 @@ src/modules/user/
 └── index.ts
 ```
 
+### Setup Existing Project
+
+```bash
+hono-cli setup [options]
+```
+
+Add hono-cli structure to an existing project. Perfect for migrating existing Hono.js projects to use hono-cli patterns.
+
+**What it does:**
+- Creates shared structure (controller, service, pagination, query, aggregate, errors)
+- Adds database configuration
+- Creates seed runner script
+- Updates `tsconfig.json` with path aliases
+- Updates `package.json` with required dependencies and scripts
+
+**Options:**
+- `-f, --force` - Overwrite existing files without asking
+- `-d, --dry-run` - Preview changes without modifying files
+- `-b, --backup` - Backup existing files before overwriting
+
+**Example usage:**
+```bash
+# Preview what will be changed
+hono-cli setup --dry-run
+
+# Setup with prompts for existing files
+hono-cli setup
+
+# Force overwrite all files
+hono-cli setup --force
+
+# Backup and overwrite
+hono-cli setup --force --backup
+```
+
 The router generator:
 - Creates only routing-related files
 - Automatically registers routes in the route manager
@@ -172,6 +207,7 @@ PROD_DB_NAME=hono_prod
 | `hono-cli init <name>` | Create new Hono.js project |
 | `hono-cli g:m <name>` | Generate new module with CRUD |
 | `hono-cli g:r <name>` | Generate router only |
+| `hono-cli setup [options]` | Setup hono-cli structure in existing project |
 | `hono-cli add:seed` | Add seed system to existing project |
 | `hono-cli version` or `hono-cli v` | Show version info |
 

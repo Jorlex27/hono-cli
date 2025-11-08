@@ -1,4 +1,4 @@
-export const CLI_VERSION = '2.0.5'
+export const CLI_VERSION = '2.0.7'
 
 export const CLI_NAME = 'hono-cli'
 

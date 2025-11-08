@@ -7,6 +7,7 @@ import {
     generateModuleCommand,
     generateRouterCommand,
     addSeedCommand,
+    setupCommand,
 } from '@/commands'
 
 const program = new Command()
@@ -41,5 +42,13 @@ program
     .command('add:seed')
     .description('Add seed system to existing project')
     .action(addSeedCommand)
+
+program
+    .command('setup')
+    .description('Setup hono-cli structure in existing project')
+    .option('-f, --force', 'Overwrite existing files without asking')
+    .option('-d, --dry-run', 'Show what would be done without making changes')
+    .option('-b, --backup', 'Backup existing files before overwriting')
+    .action(setupCommand)
 
 program.parse(process.argv)
