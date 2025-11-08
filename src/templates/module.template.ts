@@ -70,7 +70,7 @@ export const ${camelName}Router =
         .get('/', ${camelName}Controller.getAll)
         .get('/:id', ${camelName}Controller.getById)
         .post('/', ${camelName}Controller.create)
-        .post('/restore/:id', ${camelName}Controller.restore)
+        .patch('/:id/restore', ${camelName}Controller.restore)
         .put('/:id', ${camelName}Controller.update)
         .delete('/:id', ${camelName}Controller.delete)
     `
