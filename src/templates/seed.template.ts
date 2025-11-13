@@ -9,8 +9,6 @@ interface SeederInfo {
 }
 
 class SeedRunner {
-  private seedersCache: Map<string, any> = new Map()
-
   async discoverSeeders(): Promise<SeederInfo[]> {
     const modulesPath = path.join(process.cwd(), 'src/modules')
     const seeders: SeederInfo[] = []
@@ -46,10 +44,6 @@ class SeedRunner {
   }
 
   async loadSeeder(moduleName: string) {
-    if (this.seedersCache.has(moduleName)) {
-      return this.seedersCache.get(moduleName)
-    }
-
     const seeders = await this.discoverSeeders()
     const seederInfo = seeders.find(s => s.name === moduleName)
 
@@ -80,7 +74,6 @@ class SeedRunner {
       }
 
       const seeder = new SeederClass(service)
-      this.seedersCache.set(moduleName, seeder)
       return seeder
     } catch (error) {
       throw new Error(\`Failed to load seeder for \${moduleName}: \${error}\`)

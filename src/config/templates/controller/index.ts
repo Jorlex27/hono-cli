@@ -221,6 +221,21 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
             }
         },
 
+        getCount: async (c: Context) => {
+            try {
+                const context = extractContext(c)
+                const count = await service.countDocuments(c, context)
+
+                return c.json({
+                    success: true,
+                    message: 'Count retrieved successfully',
+                    data: { count }
+                })
+            } catch (error) {
+                return ApiError.handle(error, c, entityName)
+            }
+        },
+
         // Placeholder for export functionality
         // export: async (c: Context) => {
         //     try {

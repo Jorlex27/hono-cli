@@ -59,6 +59,19 @@ export const ${camelName}Service = new BaseService<${name}Data, ${name}Input>({
     // beforeDelete: async (id, context) => {},
     // afterDelete: async (id, context) => {},
 })
+
+// Available methods from BaseService:
+// - countDocuments(filter?: Record<string, any> | Context, context?: ServiceContext): Promise<number>
+// - getAll(filter, context)
+// - getById(id, context)
+// - create(data, context)
+// - createMany(data, context)
+// - update(id, data, context)
+// - delete(id, context)
+// - deleteMany(filter, context)
+// - advanceDelete(filter, id, options)
+// - restore(id, context)
+// - and more...
 `
 
 export const generateRouteTemplate = (pascalName: string, kebabName: string, camelName: string): string => `
@@ -68,6 +81,7 @@ import { ${camelName}Controller } from './${kebabName}.controller'
 export const ${camelName}Router =
     new Hono()
         .get('/', ${camelName}Controller.getAll)
+        .get('/count', ${camelName}Controller.getCount)
         .get('/:id', ${camelName}Controller.getById)
         .post('/', ${camelName}Controller.create)
         .patch('/:id/restore', ${camelName}Controller.restore)
@@ -80,8 +94,6 @@ import { ${camelName}Service } from './${kebabName}.service'
 import type { ${pascalName}Input } from './${kebabName}.types'
 
 export class ${pascalName}Seeder {
-    private seededIds: string[] = []
-
     constructor(private service: typeof ${camelName}Service) {}
 
     async seed(): Promise<string[]> {
@@ -100,35 +112,21 @@ export class ${pascalName}Seeder {
         }
 
         const items = await this.service.createMany(data, {})
-        this.seededIds = items.map((item) => item._id.toString())
 
         console.log(\`✅ Seeded \${items.length} ${kebabName}(s)\`)
-        return this.seededIds
+        return items.map((item) => item._id.toString())
     }
 
     async unseed(): Promise<void> {
         console.log('🗑️  Unseeding ${kebabName}...')
 
-        if (this.seededIds.length === 0) {
-            console.log('⚠️  No seeded IDs to unseed for ${kebabName}')
-            return
-        }
+        // Option 1: Delete all documents
+        // await this.service.deleteMany({}, {})
 
-        await this.service.deleteMany(
-            { _id: { $in: this.seededIds } },
-            {}
-        )
+        // Option 2: Advance delete (soft delete or permanent)
+        await this.service.advanceDelete({}, undefined, { operation: 'all' })
 
-        console.log(\`✅ Unseeded \${this.seededIds.length} ${kebabName}(s)\`)
-        this.seededIds = []
-    }
-
-    getSeededIds(): string[] {
-        return this.seededIds
-    }
-
-    setSeededIds(ids: string[]): void {
-        this.seededIds = ids
+        console.log(\`✅ Unseeded ${kebabName}(s)\`)
     }
 }
 `
