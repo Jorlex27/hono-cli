@@ -1,23 +1,38 @@
-export const controllerIndexTemplate = `import { ApiError } from "@/shared/errors"
-import { Context } from "hono"
-import { z } from "zod"
-import { QueryParser } from "../query"
-import { BaseInput, BaseModel, ServiceContext } from "../service/types"
-import { ControllerOptions } from "./types"
+export const controllerIndexTemplate = `import { ApiError } from '@/shared/errors'
+import { Context } from 'hono'
+import { z } from 'zod'
+import { BaseInput, BaseModel, ServiceContext } from '../service/types'
+import { ControllerOptions } from './types'
 
 export function createController<T extends BaseModel, U extends BaseInput<T>>(
     options: ControllerOptions<T, U>
 ) {
-    const { service, validationSchema, validationUpdateSchema, entityName = 'Item', hooks, findByIdOptions = {} } = options
+    const {
+        service,
+        validationSchema,
+        validationUpdateSchema,
+        entityName = 'Item',
+        hooks,
+        findByIdOptions = {},
+    } = options
 
-    const extractContext = (c: Context): ServiceContext => ({
-        user: c.get('user'),
-        userId: c.get('user')?._id,
-        metadata: {
-            ip: c.get('clientIP'),
-            userAgent: c.req.header('user-agent')
+    const extractContext = (c: Context): ServiceContext => {
+        const contextFromMiddleware = c.get('context') as ServiceContext | undefined
+
+        return {
+            user: contextFromMiddleware?.user || c.get('user'),
+            userId: contextFromMiddleware?.userId || c.get('user')?._id?.toString(),
+            appId: contextFromMiddleware?.appId,
+            appFilter: contextFromMiddleware?.appFilter,
+            userFilter: contextFromMiddleware?.userFilter,
+            tahunAjaranId: contextFromMiddleware?.tahunAjaranId,
+            metadata: {
+                ip: c.get('clientIP'),
+                userAgent: c.req.header('user-agent'),
+                ...contextFromMiddleware?.metadata,
+            },
         }
-    })
+    }
 
     return {
         getAll: async (c: Context) => {
@@ -27,8 +42,17 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
                 return c.json({
                     success: true,
-                    message: 'Success',
-                    data: result
+                    data: {
+                        items: result.data,
+                        pagination: {
+                            total: result.total,
+                            page: result.page,
+                            limit: result.limit,
+                            totalPages: result.totalPages,
+                            hasNext: result.hasNext,
+                            hasPrev: result.hasPrev,
+                        },
+                    },
                 })
             } catch (error) {
                 return ApiError.handle(error, c, entityName)
@@ -37,16 +61,15 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
         getById: async (c: Context) => {
             try {
-                const params = new QueryParser().parse(c.req.query())
                 const id = c.req.param('id')
                 if (!id) throw ApiError.missingParam('id')
 
                 const context = extractContext(c)
-                const item = await service.findById(id, context, params, findByIdOptions)
+                const item = await service.findById(id, context, findByIdOptions)
+
                 return c.json({
                     success: true,
-                    message: 'Success',
-                    data: item
+                    data: item,
                 })
             } catch (error) {
                 return ApiError.handle(error, c, entityName)
@@ -76,14 +99,16 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
                 const newItem = await service.create(validatedData, context)
 
                 if (hooks?.afterCreate) {
-                    await hooks.afterCreate(validatedData, context, c)
+                    await hooks.afterCreate(newItem, context, c)
                 }
 
-                return c.json({
-                    success: true,
-                    message: \`\${entityName} created successfully\`,
-                    data: newItem
-                }, 201)
+                return c.json(
+                    {
+                        success: true,
+                        data: newItem,
+                    },
+                    201
+                )
             } catch (error) {
                 return ApiError.handle(error, c, entityName)
             }
@@ -97,18 +122,20 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
                 const data = await c.req.json()
                 const context = extractContext(c)
 
-                const checkValidation = (): z.ZodTypeAny => {
+                const checkValidation = (): z.ZodTypeAny | undefined => {
                     const validation = validationUpdateSchema || validationSchema
+                    if (!validation) return undefined
                     try {
                         return validation.partial()
-                    } catch (error) {
+                    } catch {
                         return validation
                     }
                 }
 
                 let validatedData: Partial<T>
-                if (checkValidation()) {
-                    const validate = checkValidation().safeParse(data)
+                const schema = checkValidation()
+                if (schema) {
+                    const validate = schema.safeParse(data)
                     if (!validate.success) {
                         throw ApiError.validation(validate.error)
                     }
@@ -118,19 +145,18 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
                 }
 
                 if (hooks?.beforeUpdate) {
-                    await hooks.beforeUpdate(validatedData, context, c)
+                    await hooks.beforeUpdate(id, validatedData, context, c)
                 }
 
                 const updatedItem = await service.update(id, validatedData, context)
 
                 if (hooks?.afterUpdate) {
-                    await hooks.afterUpdate(validatedData, context, c)
+                    await hooks.afterUpdate(id, validatedData, context, c)
                 }
 
                 return c.json({
                     success: true,
-                    message: \`\${entityName} updated successfully\`,
-                    data: updatedItem
+                    data: updatedItem,
                 })
             } catch (error) {
                 return ApiError.handle(error, c, entityName)
@@ -145,23 +171,18 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
                 const context = extractContext(c)
 
                 if (hooks?.beforeDelete) {
-                    await hooks.beforeDelete({} as Partial<T>, context, c)
+                    await hooks.beforeDelete(id, context, c)
                 }
 
                 const result = await service.delete(id, context)
 
                 if (hooks?.afterDelete) {
-                    await hooks.afterDelete({} as Partial<T>, context, c)
+                    await hooks.afterDelete(id, context, c)
                 }
-
-                const message = service.options.softDelete
-                    ? \`\${entityName} moved to trash\`
-                    : \`\${entityName} deleted permanently\`
 
                 return c.json({
                     success: true,
-                    message,
-                    data: result
+                    data: result,
                 })
             } catch (error) {
                 return ApiError.handle(error, c, entityName)
@@ -178,8 +199,33 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
                 return c.json({
                     success: true,
-                    message: \`\${entityName} restored successfully\`,
-                    data: restoredItem
+                    data: restoredItem,
+                })
+            } catch (error) {
+                return ApiError.handle(error, c, entityName)
+            }
+        },
+
+        hardDelete: async (c: Context) => {
+            try {
+                const id = c.req.param('id')
+                if (!id) throw ApiError.missingParam('id')
+
+                const context = extractContext(c)
+
+                if (hooks?.beforeDelete) {
+                    await hooks.beforeDelete(id, context, c)
+                }
+
+                const result = await service.hardDelete(id, context)
+
+                if (hooks?.afterDelete) {
+                    await hooks.afterDelete(id, context, c)
+                }
+
+                return c.json({
+                    success: true,
+                    data: result,
                 })
             } catch (error) {
                 return ApiError.handle(error, c, entityName)
@@ -189,7 +235,6 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
         bulkCreate: async (c: Context) => {
             try {
                 const dataArray = await c.req.json()
-
                 if (!Array.isArray(dataArray)) {
                     throw ApiError.badRequest('Expected array of items')
                 }
@@ -197,11 +242,13 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
                 const context = extractContext(c)
                 const result = await service.createMany(dataArray, context)
 
-                return c.json({
-                    success: true,
-                    message: \`\${dataArray.length} \${entityName}s created successfully\`,
-                    data: result
-                }, 201)
+                return c.json(
+                    {
+                        success: true,
+                        data: result,
+                    },
+                    201
+                )
             } catch (error) {
                 return ApiError.handle(error, c, entityName)
             }
@@ -209,12 +256,12 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
         getStats: async (c: Context) => {
             try {
-                const stats = await service.getStats()
+                const context = extractContext(c)
+                const stats = await service.getStats(context)
 
                 return c.json({
                     success: true,
-                    message: 'Statistics retrieved successfully',
-                    data: stats
+                    data: stats,
                 })
             } catch (error) {
                 return ApiError.handle(error, c, entityName)
@@ -228,34 +275,13 @@ export function createController<T extends BaseModel, U extends BaseInput<T>>(
 
                 return c.json({
                     success: true,
-                    message: 'Count retrieved successfully',
-                    data: { count }
+                    data: { count },
                 })
             } catch (error) {
                 return ApiError.handle(error, c, entityName)
             }
         },
 
-        // Placeholder for export functionality
-        // export: async (c: Context) => {
-        //     try {
-        //         checkAccess(c)
-        //         const { format = 'json' } = c.req.query()
-        //         const context = extractContext(c)
-        //
-        //         // Implement your export logic here
-        //         // Example: const data = await service.findAllWithPipelineData(c, undefined, undefined, context)
-        //
-        //         return c.json({
-        //             success: true,
-        //             message: 'Export functionality not implemented',
-        //             data: null
-        //         })
-        //     } catch (error) {
-        //         return ApiError.handle(error, c, entityName)
-        //     }
-        // },
-
-        extractContext
+        extractContext,
     }
 }`

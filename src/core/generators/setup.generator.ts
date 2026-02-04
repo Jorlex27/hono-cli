@@ -18,6 +18,7 @@ import { controllerIndexTemplate } from '@config/templates/controller'
 import { queryTypesTemplate } from '@config/templates/query/types'
 import { queryIndexTemplate } from '@config/templates/query'
 import { aggregateTypesTemplate } from '@config/templates/aggregate/types'
+import { aggregateBuilderTemplate } from '@config/templates/aggregate/builder'
 import { errorsIndexTemplate } from '@config/templates/errors'
 
 interface SetupOptions {
@@ -139,6 +140,11 @@ export class SetupGenerator {
         path: 'src/shared/aggregate/types.ts',
         content: aggregateTypesTemplate,
         description: 'Aggregation types',
+      },
+      {
+        path: 'src/shared/aggregate/index.ts',
+        content: aggregateBuilderTemplate,
+        description: 'Aggregate builder',
       },
       {
         path: 'src/shared/errors/index.ts',
